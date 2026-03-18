@@ -36,7 +36,48 @@ export default function PostifyAddPostScreen() {
 
   return (
     //Add a View to accept title, multi-line text
+  
     //Audio file and image as input
+    <View style={styles.container}>
+  <Text style={styles.label}>Title:</Text>
+  <TextInput
+    style={styles.input}
+    placeholder="Enter title"
+    value={title}
+    onChangeText={setTitle}
+  />
+
+  <Text style={styles.label}>Text Note:</Text>
+  <TextInput
+    style={styles.textArea}
+    placeholder="Enter description"
+    value={textNote}
+    onChangeText={setTextNote}
+    multiline
+  />
+
+  <Text style={styles.label}>Image:</Text>
+  <TextInput
+    style={styles.input}
+    placeholder="Enter image URL"
+    value={imageUri}
+    onChangeText={setImageUri}
+  />
+
+  {imageUri?.trim() !== '' && (
+    <Image source={{ uri: imageUri }} style={styles.image} />
+  )}
+
+  <View style={styles.buttonContainer}>
+    <Pressable style={styles.button} onPress={() => handleSubmit(false)}>
+      <Text style={styles.buttonText}>Post</Text>
+    </Pressable>
+    <Pressable style={styles.button} onPress={() => handleSubmit(true)}>
+      <Text style={styles.buttonText}>Post Privately</Text>
+    </Pressable>
+  </View>
+</View>
+
   );
 }
 

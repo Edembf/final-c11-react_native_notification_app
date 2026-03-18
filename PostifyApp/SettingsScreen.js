@@ -1,84 +1,125 @@
-//include all the relevant imports
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Image, StyleSheet, Alert, Pressable, ScrollView } from 'react-native';
+import { query, where, setDoc, collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
+import Toast from "react-native-toast-message";
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ navigation }) => {
   const [avatar, setAvatar] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [docRef, setDocRef] = useState(null);
 
-  // Get the current authenticated user's email
+  // 1. Initialisation de l'utilisateur
   useEffect(() => {
     const currentUser = auth.currentUser;
     if (currentUser) {
       setUserEmail(currentUser.email);
+      fetchAvatar(currentUser.email);
     } else {
-      Alert.alert('User not logged in', 'Please log in to upload an avatar.');
+      Alert.alert('Erreur', 'Veuillez vous connecter.');
     }
   }, []);
 
-  const fetchAvatar = async () => {
+  // 2. Récupération des données existantes
+  const fetchAvatar = async (email) => {
     try {
-      // Create a query to find documents with the specified email
-      const q = query(collection(db, "user_data"), where("email", "==", auth.currentUser.email));
+      const q = query(collection(db, "user_data"), where("email", "==", email));
       const querySnapshot = await getDocs(q);
 
-      // Check if the query returned any results
       if (!querySnapshot.empty) {
-        querySnapshot.forEach((docItem) => {
-          const docRef = doc(db, "user_data", docItem.id);
-          console.log(docRef);
-          setDocRef(docRef);
-
-          if(docItem.data().avatar) {
-            setAvatar(docItem.data().avatar);
-          }
-          if(docItem.data().displayName) {
-            setDisplayName(docItem.data().displayName);
-          }
-        });
-      } else {
-        console.log("No such document!");
+        const docItem = querySnapshot.docs[0]; // On prend le premier résultat
+        const ref = doc(db, "user_data", docItem.id);
+        
+        setDocRef(ref);
+        setAvatar(docItem.data().avatar || "");
+        setDisplayName(docItem.data().displayName || "");
       }
     } catch (error) {
-      console.error("Error getting document: ", error);
+      console.error("Erreur lors de la récupération :", error);
     }
   };
 
-  useEffect(() => {  
-    fetchAvatar();
-  }, []);
-
+  // 3. Sauvegarde des modifications
   const saveChanges = async () => {
-    if (!docRef) {
-      await addDoc(collection(db, "user_data"), {
-        email:userEmail,
-        avatar:url,
-        displayName: displayName
+    try {
+      if (!docRef) {
+        // Création si le profil n'existe pas encore
+        await addDoc(collection(db, "user_data"), {
+          email: userEmail,
+          avatar: avatar,
+          displayName: displayName
+        });
+      } else {
+        // Mise à jour du document existant
+        await updateDoc(docRef, {
+          avatar: avatar,
+          displayName: displayName 
+        });
+      }
+
+      Toast.show({
+        type: "success",
+        text1: "Succès !",
+        text2: "Modifications enregistrées 👋",
+        position: "top"
       });
-    } else {
-      await setDoc(docRef, 
-                    { email: userEmail, 
-                      avatar: avatar, 
-                      displayName: displayName 
-                    });
+
+      // Délai pour laisser le temps au toast de s'afficher
+      setTimeout(() => navigation.navigate('ListUsers'), 1500);
+
+    } catch (error) {
+      Alert.alert("Erreur", "Impossible de sauvegarder.");
     }
-    Toast.show({
-      type: "success",
-      text1: "Changes Saved",
-      text2: "Your changes have been saved 👋", // Subtitle
-      position: "top"
-    });
-    navigation.navigate('ListUsers')
-  }
+  };
 
   return (
-    {/*Add the component that is returned here */}
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Paramètres du profil</Text>
+
+        <View style={styles.avatarContainer}>
+          {avatar ? (
+            <Image source={{ uri: avatar }} style={styles.avatar} />
+          ) : (
+            <Text style={styles.avatarPlaceholder}>Aucun Avatar</Text>
+          )}
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Nom d'affichage</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Votre nom"
+            value={displayName}
+            onChangeText={setDisplayName}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>URL de l'avatar</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Lien http://..."
+            value={avatar}
+            onChangeText={setAvatar}
+          />
+        </View>
+
+        <Pressable style={styles.button} onPress={saveChanges}>
+          <Text style={styles.buttonText}>Enregistrer</Text>
+        </Pressable>
+      </ScrollView>
+
+      {/* Toujours placer le Toast à la racine du return */}
+      <Toast />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -86,32 +127,55 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
+    marginBottom: 30,
     fontWeight: 'bold',
+    color: '#333'
   },
   avatarContainer: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: '#ddd',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#fff',
+    elevation: 5, // Ombre sur Android
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
+    overflow: 'hidden'
   },
   avatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 75,
   },
   avatarPlaceholder: {
+    color: '#999',
+    textAlign: 'center',
+  },
+  formGroup: {
+    width: '100%',
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 14,
     color: '#666',
-    fontSize: 18,
+    marginBottom: 5,
+    marginLeft: 5
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderColor: '#ddd',
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 10,
+    fontSize: 16,
+    width: '100%'
   },
   button: {
     backgroundColor: 'black',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    marginTop: 20,
+    width: '100%',
     alignItems: 'center',
   },
   buttonText: {
@@ -119,20 +183,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  input: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    padding: 8,
-    marginTop: 5,
-    borderRadius: 5,
-    fontSize: 16
-  },
-  label: {
-    marginRight:10, 
-    padding: 8, 
-    marginTop: 5, 
-    fontSize:16
-  }
 });
 
 export default SettingsScreen;

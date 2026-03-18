@@ -6,12 +6,13 @@ import { getStorage } from 'firebase/storage';
 
 
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "XXXXX",
+  authDomain: "XXXXX",
+  projectId: "XXXXX",
+  storageBucket: "XXXX",
+  messagingSenderId: "XXXXXX",
+  appId: "XXXXXXXXXXX",
+  measurementId: "XXXXXXXXXX"
 };
 
 export const app = initializeApp(firebaseConfig);
