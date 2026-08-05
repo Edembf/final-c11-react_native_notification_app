@@ -1,15 +1,7 @@
-GitHub Copilot Chat Assistant
 
-Summary
-- I inspected the repository root: .gitignore, LICENSE, PostifyApp/ (directory), README.md (short French template), package-lock.json.
-- I can create a new branch and commit an improved README.md for you, but I cannot open the pull request (there’s no tool available here to create PRs). I can prepare the branch and commit and give you the exact PR title/body to use when you open the PR in GitHub.
+# PostifyMe — React Native Notification App
 
-Below is a polished README I propose to add (English). Review and tell me if you want changes, then I will create a branch and commit it.
-
-Proposed README.md
-# Postify — React Native Notification App
-
-Postify is a React Native sample app demonstrating user posts, Firebase-backed authentication, storage, and push/local notification integration. It was built as part of a mobile notifications and backend course and includes a ready structure for authentication, user profiles, posting images, and notification handling.
+PostifyMe is a React Native sample app demonstrating user posts, Firebase-backed authentication, storage, and push/local notification integration. It was built as part of a mobile notifications and backend course and includes a ready structure for authentication, user profiles, posting images, and notification handling.
 
 Key features
 - Email/password authentication using Firebase Auth
@@ -139,28 +131,3 @@ License
 Contact
 - Maintainer: Edembf
 - Repo: https://github.com/Edembf/final-c11-react_native_notification_app
-
-Next steps — what I can do for you
-- If you confirm, I will:
-  1) Create a new branch named add-readme (or a branch name you prefer).
-  2) Replace the repository README.md with the proposed content (or create README-updated.md if you prefer preserving the old file).
-  3) Commit the change and push it to the new branch.
-
-I cannot open the PR automatically, but I will provide a ready PR title and body for you to paste into GitHub when creating the pull request.
-
-Suggested PR title and body
-- Title: docs: replace README with comprehensive project README
-- Body:
-  This PR replaces the placeholder README with a full project README that includes setup instructions, Firebase configuration steps, running/testing instructions, recommended Firestore structure, and contribution notes.
-
-  Changes:
-  - Updated README.md with detailed project information and setup steps.
-  - No changes to source code.
-
-Approve and next steps
-- Reply with:
-  - Approve to proceed, and confirm branch name (default: add-readme).
-  - Whether to overwrite README.md or create a new file (overwrite recommended).
-  - Any wording preferences (French vs English) or additional details to include.
-
-Which option do you want me to take?
